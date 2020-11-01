@@ -7,21 +7,13 @@ from flask_sqlalchemy import SQLAlchemy
 from marshmallow_sqlalchemy import ModelSchema, SQLAlchemySchema, auto_field
 from sqlalchemy import exc
 from UserLifecycle.Models import UserModel
-
-
-api = Api()
-db = SQLAlchemy()
-
-
-def create_app( config_filename ):
-    app = Flask('smed')
-    app.config.from_pyfile( config_filename )
-    api.init_app(app)
-    db.init_app(app)
-    return app
-
+from Core.Shared.DB import create_db
+from Core.Shared.API import create_api
+from Core.Shared.APP import create_app
 
 app = create_app('config.py')
+api = create_api( app )
+db = create_db( app )
 
 
 # user representation to the user/flask

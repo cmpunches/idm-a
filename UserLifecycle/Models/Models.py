@@ -1,6 +1,8 @@
-from flask_sqlalchemy import SQLAlchemy
+from Core.Shared.APP import create_app
+from Core.Shared.DB import create_db
 
-db = SQLAlchemy()
+app = create_app( 'config.py' )
+db = create_db( app )
 
 
 # user representation to the ORM

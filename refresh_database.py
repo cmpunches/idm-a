@@ -1,7 +1,7 @@
-from main import db, create_app
+from main import db, app, create_app
 
 
-app = create_app('config.py')
+# app = create_app('config.py')
 
 with app.app_context():
     print("We're in app context.  Stuff should be deleted.")
