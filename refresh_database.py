@@ -1,15 +1,4 @@
-from flask_sqlalchemy import SQLAlchemy
-from flask import Flask
-from UserLifecycle.Models.Models import UserModel
-
-db = SQLAlchemy()
-
-
-def create_app( config_filename ):
-    app = Flask('smed')
-    app.config.from_pyfile( config_filename )
-    db.init_app(app)
-    return app
+from main import db, create_app
 
 
 app = create_app('config.py')
