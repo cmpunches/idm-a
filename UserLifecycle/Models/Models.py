@@ -1,8 +1,4 @@
-from Core.Shared.APP import create_app
-from Core.Shared.DB import create_db
-
-app = create_app( 'config.py' )
-db = create_db( app )
+from Core.Shared.DB import db
 
 
 # user representation to the ORM
