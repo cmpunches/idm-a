@@ -46,7 +46,7 @@ class UserRoute(Resource):
         return user_schema.dump( [ user ] ), 201
 
     @user_namespace.response(204, 'User has been disabled.')
-    @user_namespace.response(409, 'User is already inactive.')
+    @user_namespace.response(409, 'User is already disabled.')
     def delete( self, user_id ):
         # disable a user
 
@@ -59,3 +59,16 @@ class UserRoute(Resource):
         db.session.commit()
 
         return user_schema.dump( [ user ] ), 204
+
+
+@user_namespace.route('/verify/<email>')
+class EmailValidation(Resource):
+    def post( self, email ):
+        user = UserModel.query.filter_by( email="guest@silogroup.org" ).first()
+        print(user)
+        validation = EmailValidation(
+            email=user.email
+        )
+        print(validation)
+        db.session.add( validation )
+        db.session.commit()
