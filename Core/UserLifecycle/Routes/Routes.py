@@ -1,7 +1,7 @@
-from flask_restplus import Namespace, Resource, fields
+from flask_restplus import Namespace, Resource
 from flask import request
-from UserLifecycle.Schemas import *
-from UserLifecycle.Models import *
+from Core.UserLifecycle.Schemas import *
+from Core.UserLifecycle.Models import *
 from sqlalchemy import exc
 
 user_namespace = Namespace( 'user', description="User management functions." )
