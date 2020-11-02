@@ -61,14 +61,23 @@ class UserRoute(Resource):
         return user_schema.dump( [ user ] ), 204
 
 
-@user_namespace.route('/verify/<email>')
+@user_namespace.route('/verify/<code>')
 class EmailValidation(Resource):
-    def post( self, email ):
-        user = UserModel.query.filter_by( email="guest@silogroup.org" ).first()
-        print(user)
-        validation = EmailValidation(
-            email=user.email
-        )
-        print(validation)
-        db.session.add( validation )
-        db.session.commit()
+    def get( self, code ):
+        # get a validation entry for that code
+        validation = EmailValidationModel.query.filter_by( code=code ).first()
+        email = validation.email
+
+        if validation is not None:
+            # delete the entry in the validation table
+            db.session.delete( validation )
+
+            # set the associated user to active
+            user = UserModel.query.filter_by( email=email ).first()
+            user.verified = True
+            db.session.commit()
+
+        else:
+            return { "status": "Invalid code."}, 404
+
+        return { "status": "The user's email has now been verified." }, 202

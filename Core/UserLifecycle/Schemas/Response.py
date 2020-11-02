@@ -16,3 +16,4 @@ class UserSchema(SQLAlchemySchema):
 
 
 user_schema = UserSchema(many=True)
+

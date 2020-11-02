@@ -15,13 +15,13 @@ class UserModel(db.Model):
     email       = db.Column( db.String(120),    unique=True,        nullable=False      )
     verified    = db.Column( db.Boolean,                            default=False       )
     password    = db.Column( db.String(50),                         nullable=False      )
-    active      = db.Column( db.Boolean,                            default=False       )
+    active      = db.Column( db.Boolean,                            default=True        )
 
     def __repr__(self):
         return '<User %r>' % self.username
 
 
-class EmailValidation(db.Model):
+class EmailValidationModel(db.Model):
     __tablename__ = 'email_validation'
     # each entry gets an index
     # a timestamp so we can expire them as they get old

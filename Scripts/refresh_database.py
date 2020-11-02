@@ -6,8 +6,8 @@ app = create_app('config.py')
 admin_user = UserModel(username='admin', email='smed_admin@silogroup.org', password='smed')
 guest_user = UserModel(username='guest', email='guest@silogroup.org', password='guest')
 
-admin_user_validation = EmailValidation( email=admin_user.email )
-guest_user_validation = EmailValidation( email=guest_user.email )
+admin_user_validation = EmailValidationModel(email=admin_user.email)
+guest_user_validation = EmailValidationModel(email=guest_user.email)
 
 with app.app_context():
     # drop everything
