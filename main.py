@@ -6,7 +6,8 @@ from flask_restplus import Api, Resource, fields
 from flask_sqlalchemy import SQLAlchemy
 from marshmallow_sqlalchemy import ModelSchema, SQLAlchemySchema, auto_field
 from sqlalchemy import exc
-from UserLifecycle.Models import UserModel
+from UserLifecycle.Models import *
+from UserLifecycle.Schemas import *
 from Core.Shared.DB import db
 from Core.Shared.API import create_api
 from Core.Shared.APP import create_app
@@ -15,30 +16,8 @@ app = create_app('config.py')
 api = create_api( app )
 
 
-# user representation to the user/flask
-class UserSchema(SQLAlchemySchema):
-    class Meta:
-        model = UserModel
-        load_instance = True
-
-    id          = auto_field()
-    username    = auto_field()
-    email       = auto_field()
-    verified    = auto_field()
-    active      = auto_field()
 
 
-# user representation on post for the docs
-user_creation_schema = api.model(
-    "User Creation Schema",
-    {
-        "username": fields.String(description="The username for the new user."),
-        "email": fields.String(description="The email address of the new user."),
-        "password": fields.String(description="The password of the new user.")
-    }
-)
-
-user_schema = UserSchema(many=True)
 
 
 
@@ -57,7 +36,7 @@ class UserRoute(Resource):
 
         return user_schema.dump( users )
 
-    @api.expect( user_creation_schema )
+    @api.expect( user_creation_schema( api ) )
     @api.response(201, 'User Created.')
     @api.response(409, 'User already exists.')
     def post(self):
