@@ -6,6 +6,7 @@ from sqlalchemy import exc
 
 user_namespace = Namespace( 'user', description="User management functions." )
 
+
 @user_namespace.route('', methods=['GET', 'POST'])
 @user_namespace.route('/username/<username>', methods=['GET'])
 @user_namespace.route('/id/<user_id>', methods=['GET', 'DELETE'])
@@ -63,6 +64,8 @@ class UserRoute(Resource):
 
 @user_namespace.route('/verify/<code>')
 class EmailValidation(Resource):
+    @user_namespace.response( 404, 'Invalid email verification code.' )
+    @user_namespace.response( 202, 'The user\'s email is now verified' )
     def get( self, code ):
         # get a validation entry for that code
         validation = EmailValidationModel.query.filter_by( code=code ).first()
