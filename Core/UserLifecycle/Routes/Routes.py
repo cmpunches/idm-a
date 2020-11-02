@@ -41,12 +41,21 @@ class UserRoute(Resource):
         except exc.IntegrityError as err:
             db.session.rollback()
             if err.orig.args[0] == 1062:
-                return {"error": "User already exists."}, 409
+                return user_schema.dump( [ user ] ), 409
 
         return user_schema.dump( [ user ] ), 201
 
-    def delete(self):
+    @user_namespace.response(204, 'User has been disabled.')
+    @user_namespace.response(409, 'User is already inactive.')
+    def delete( self, user_id ):
         # disable a user
-        json_data = request.json
 
-        user = UserModel.query.filter_by( id=user_id )
+        user = UserModel.query.get( user_id )
+        if user.active:
+            user.active = False
+        else:
+            return user_schema.dump( [ user ] ), 409
+
+        db.session.commit()
+
+        return user_schema.dump( [ user ] ), 204
