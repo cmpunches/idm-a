@@ -1,5 +1,6 @@
 from Core.Shared.APP import create_app
-from Core.UserLifecycle.Models import *
+from Core.UserLifecycle.StorageModels import *
+import time
 
 app = create_app('config.py')
 
@@ -26,6 +27,8 @@ with app.app_context():
     # setup pending validation entries
     db.session.add(admin_user_validation)
     db.session.commit()
+
+    time.sleep(3)
 
     db.session.add(guest_user_validation)
     db.session.commit()

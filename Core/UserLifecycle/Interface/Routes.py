@@ -1,7 +1,7 @@
 from flask_restplus import Namespace, Resource
 from flask import request
-from Core.UserLifecycle.Schemas import *
-from Core.UserLifecycle.Models import *
+from Core.UserLifecycle.IO_Schemas import *
+from Core.UserLifecycle.StorageModels import *
 from sqlalchemy import exc
 
 user_namespace = Namespace( 'user', description="User management functions." )

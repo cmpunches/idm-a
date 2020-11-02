@@ -1,5 +1,5 @@
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
-from ..Models import *
+from ..StorageModels import *
 
 
 # user representation to the user/flask
