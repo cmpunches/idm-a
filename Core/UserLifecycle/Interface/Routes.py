@@ -1,6 +1,7 @@
+from Core.UserLifecycle.Engine import *
+
 from flask_restplus import Namespace, Resource
 from flask import request
-from Core.UserLifecycle.Engine import *
 
 user_namespace = Namespace( 'user', description="User management functions." )
 user_controller = UserLifeCycleController()

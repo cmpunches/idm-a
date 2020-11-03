@@ -1,7 +1,9 @@
-from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
 from ..StorageModels import *
+
+from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
 from enum import Enum, auto
 import json
+
 
 # user representation to the user/flask
 class UserSchema(SQLAlchemySchema):
