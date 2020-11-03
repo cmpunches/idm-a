@@ -34,3 +34,4 @@ with app.app_context():
     db.session.commit()
 
     exit(0)
+

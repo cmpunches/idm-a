@@ -1,6 +1,7 @@
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
 from ..StorageModels import *
-
+from enum import Enum, auto
+import json
 
 # user representation to the user/flask
 class UserSchema(SQLAlchemySchema):
@@ -17,3 +18,36 @@ class UserSchema(SQLAlchemySchema):
 
 user_schema = UserSchema(many=True)
 
+
+class STATUS(Enum):
+    SUCCESS         = auto()
+    DATA_CONFLICT   = auto()
+    DATA_STRUCTURE  = auto()
+    FAILURE         = auto()
+
+
+class EResp:
+    def __init__( self, status, message, attachment=None ):
+        self.status = status
+        self.message = message
+
+        if attachment is not None:
+            self.attachment = attachment
+        else:
+            self.attachment = "NULL"
+
+    def to_json(self):
+        serialized_self = dict()
+        serialized_self['status'] = self.status.name
+        serialized_self['message'] = self.message
+        if self.attachment != "NULL":
+            serialized_self['attachment'] = json.loads( self.attachment )
+        serialized_self['attachment'] = None
+
+        return serialized_self
+
+    def __repr__(self):
+        return self.to_json()
+
+    def __str__(self):
+        return self.to_json()
