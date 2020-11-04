@@ -5,6 +5,15 @@ from enum import Enum, auto
 import json
 
 
+def is_serializable( obj ):
+    try:
+        json.dumps( obj )
+        return True
+    # fuck PEP8
+    except:
+        return False
+
+
 # user representation to the user/flask
 class UserSchema(SQLAlchemySchema):
     class Meta:
@@ -18,7 +27,7 @@ class UserSchema(SQLAlchemySchema):
     active      = auto_field()
 
 
-user_schema = UserSchema(many=True)
+user_schema = UserSchema( many=True )
 
 
 class STATUS(Enum):
@@ -42,9 +51,10 @@ class EResp:
         serialized_self = dict()
         serialized_self['status'] = self.status.name
         serialized_self['message'] = self.message
-        if self.attachment != "NULL":
+        if self.attachment != "NULL" and is_serializable( self.attachment ):
             serialized_self['attachment'] = json.loads( self.attachment )
-        serialized_self['attachment'] = None
+        else:
+            serialized_self['attachment'] = None
 
         return serialized_self
 

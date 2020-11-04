@@ -23,11 +23,12 @@ class UserRoute(Resource):
         if response.status == STATUS.SUCCESS:
             return response.to_json(), 200
 
-        return { "general": "failure" }, 444
+        response.message = "General failure.  This is a bug and should be reported."
+        return response.to_json(), 500
 
     @user_namespace.expect( user_creation_schema( user_namespace ) )
-    @user_namespace.response(201, 'User Created.')
-    @user_namespace.response(409, 'User already exists.')
+    @user_namespace.response( 201, 'User Created.')
+    @user_namespace.response( 409, 'User already exists.' )
     def post(self):
         # create a user
         json_data = request.json
@@ -45,8 +46,11 @@ class UserRoute(Resource):
         if response.status == STATUS.SUCCESS:
             return response.to_json(), 201
 
-    @user_namespace.response(204, 'User has been disabled.')
-    @user_namespace.response(409, 'User is already disabled.')
+        response.message = "General failure.  This is a bug and should be reported."
+        return response.to_json(), 500
+
+    @user_namespace.response( 204, 'User has been disabled.' )
+    @user_namespace.response( 409, 'User is already disabled.' )
     def delete( self, user_id ):
         # disable a user
 
@@ -59,6 +63,9 @@ class UserRoute(Resource):
         if response.status == STATUS.FAILURE:
             return response.to_json(), 500
 
+        response.message = "General failure.  This is a bug and should be reported."
+        return response.to_json(), 500
+
 
 @user_namespace.route('/verify/<code>')
 class EmailValidation(Resource):
@@ -66,10 +73,12 @@ class EmailValidation(Resource):
     @user_namespace.response( 202, 'The user\'s email is now verified' )
     def get( self, code ):
 
-        response = user_controller.validate_email( code=code )
+        response = user_controller.validate_email_code(code=code)
 
-        print("hitfarm")
         if response.status == STATUS.FAILURE:
             return response.to_json(), 404
         if response.status == STATUS.SUCCESS:
             return response.to_json(), 202
+
+        response.message = "General failure.  This is a bug and should be reported."
+        return response.to_json(), 500
