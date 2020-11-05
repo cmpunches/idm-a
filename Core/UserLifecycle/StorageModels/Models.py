@@ -2,7 +2,8 @@ from Core.Shared.DB import db
 from datetime import datetime
 import uuid
 from sqlalchemy_serializer import SerializerMixin
-import json
+
+
 def gen_uuid4():
     return str(uuid.uuid4())
 
@@ -16,6 +17,8 @@ class UserModel( db.Model, SerializerMixin ):
     email       = db.Column( db.String(120),    unique=True,        nullable=False      )
     verified    = db.Column( db.Boolean,                            default=False       )
     password    = db.Column( db.String(50),                         nullable=False      )
+    first_name  = db.Column( db.String(50),                         nullable=False      )
+    last_name   = db.Column( db.String(50),                         nullable=False      )
     active      = db.Column( db.Boolean,                            default=True        )
 
 #    def __repr__(self):

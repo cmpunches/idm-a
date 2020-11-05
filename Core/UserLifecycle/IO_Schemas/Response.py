@@ -25,6 +25,8 @@ class UserSchema(SQLAlchemySchema):
     email       = auto_field()
     verified    = auto_field()
     active      = auto_field()
+    first_name = auto_field()
+    last_name = auto_field()
 
 
 user_schema = UserSchema( many=True )

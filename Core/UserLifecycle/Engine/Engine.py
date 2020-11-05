@@ -3,7 +3,9 @@ from Core.UserLifecycle.IO_Schemas import *
 from config import *
 
 from sqlalchemy import exc
+
 import smtplib, ssl
+
 
 class UserLifeCycleController:
     def __init__(self):
@@ -21,8 +23,15 @@ class UserLifeCycleController:
         user = UserModel.query.filter_by( username=username ).first()
         return EResp( STATUS.SUCCESS, "Found the user.", user_schema.dumps( [ user ] ) )
 
-    def create_user( self, username, email, password ):
-        user = UserModel( username=username, email=email, password=password )
+    def create_user( self, username, email, password, first_name, last_name ):
+        user = UserModel(
+            username=username,
+            email=email,
+            password=password,
+            first_name=first_name,
+            last_name=last_name
+        )
+
         db.session.add(user)
 
         try:
@@ -38,6 +47,62 @@ class UserLifeCycleController:
 
         return EResp( STATUS.SUCCESS, "User successfully created.", user_schema.dumps( [ user ] ) )
 
+    def update_user_details( self, user_id, email, username, first_name, last_name ):
+
+        user = UserModel.query.get( user_id )
+
+        if user is not None:
+
+            user.username=username
+            user.first_name=first_name
+            user.last_name=last_name
+
+            try:
+                db.session.commit()
+
+                if user.email != email:
+                    user.email = email
+                    db.session.commit()
+                    self.require_email_validation( email )
+            except:
+                return EResp(
+                    STATUS.FAILURE,
+                    "User detail update did not complete successfully.  Report this.",
+                    user_schema.dumps( [ user ] )
+                )
+        else:
+            return EResp( STATUS.DATA_CONFLICT, "The user does not exist!", None )
+
+        return EResp(
+            STATUS.SUCCESS,
+            "User details updated for user '{0}'.".format( user.username ),
+            user_schema.dumps( [ user ] )
+        )
+
+    def update_user_password( self, user_id, password ):
+
+        user = UserModel.query.get( user_id )
+
+        if user is not None:
+            if user.password != password:
+                user.password = password
+                try:
+                    db.session.commit()
+                except:
+                    return EResp(
+                        STATUS.FAILURE,
+                        "User password update did not complete successfully.  Report this.",
+                        user_schema.dumps( [ user ] )
+                    )
+        else:
+            return EResp( STATUS.DATA_CONFLICT, "The user does not exist!", None )
+
+        return EResp(
+            STATUS.SUCCESS,
+            "Password updated for user '{0}'.".format( user.username ),
+            user_schema.dumps( [ user ] )
+        )
+
     def deactivate_user( self, user_id ):
         user = UserModel.query.get( user_id )
         if user.active:
@@ -48,7 +113,6 @@ class UserLifeCycleController:
         db.session.commit()
 
         return EResp( STATUS.SUCCESS, "User disabled.", user_schema.dumps( [ user ] ) )
-
 
     def activate_user(self, user_id ):
         user = UserModel.query.get( user_id )
@@ -96,7 +160,11 @@ class UserLifeCycleController:
         else:
             return EResp( STATUS.FAILURE, "Invalid code." )
 
-        return EResp( STATUS.SUCCESS, "The email '{0}' has now been verified.".format( email ), user_schema.dumps( [ user ] ) )
+        return EResp(
+            STATUS.SUCCESS,
+            "The email '{0}' has now been verified.".format( email ),
+            user_schema.dumps( [ user ] )
+        )
 
     def send_validation_email(self, recipient, code):
         user = UserModel.query.filter_by( email=recipient ).first()
@@ -106,26 +174,34 @@ class UserLifeCycleController:
             code
         )
 
-        message = """
-        Dear {0},
-        
-        Thanks for signing up on {1}.
-        
-        To get started, you'll need to verify your email address.
-        
-        Your activation URL is:
-        {2}
-        
-        By clicking the above link, your email will be verified.
-        
-        Sincerely,
-        
-        The {1} Team.
+        message = """From: {0} <{1}> 
+To: {2} {5} <{3}>
+Reply-To: {1}
+Subject: Your {0} Verification URL
+
+Dear {2},
+
+Thanks for signing up on {0} with the username '{6}'.
+
+To get started, you'll need to verify your email address.
+
+Your activation URL is:
+{4}
+
+By clicking the above link, your email will be verified.
+
+Regards,
+The {0} Team.
         """.format(
-            user.username,
             SITE_NAME,
-            url
+            email_sender,
+            user.first_name,
+            recipient,
+            url,
+            user.last_name,
+            user.username
         )
+
 
         # create a secure SSL context
         # whatever that means

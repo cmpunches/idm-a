@@ -13,8 +13,8 @@ def add_dummy_users():
     with app.app_context():
         # add users
         user_controller = UserLifeCycleController()
-        print( json.dumps( user_controller.create_user( username='admin', email='admin@silogroup.org', password='admin').to_json(), indent=4, sort_keys=True ) )
-        print( json.dumps( user_controller.create_user( username='guest', email='guest@silogroup.org', password='guest').to_json(), indent=4, sort_keys=True ) )
+        print( json.dumps( user_controller.create_user( username='admin', email='admin@silogroup.org', password='admin', first_name="Mister", last_name="Admin" ).to_json(), indent=4, sort_keys=True ) )
+        print( json.dumps( user_controller.create_user( username='guest', email='guest@silogroup.org', password='guest', first_name="Misses", last_name="Guest" ).to_json(), indent=4, sort_keys=True ) )
         exit(0)
 
 
