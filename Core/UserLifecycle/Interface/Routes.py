@@ -7,9 +7,9 @@ user_namespace = Namespace( 'user', description="User management functions." )
 user_controller = UserLifeCycleController()
 
 
-@user_namespace.route( '', methods=['GET', 'POST'] )
+@user_namespace.route( 's', methods=['GET', 'POST'] )
 @user_namespace.route( '/username/<username>', methods=['GET'] )
-@user_namespace.route( '/id/<user_id>', methods=['GET', 'DELETE', 'PUT'] )
+@user_namespace.route( '/id/<user_id>', methods=['GET', 'DELETE'] )
 class UserRoute( Resource ):
     @user_namespace.doc( description="Fetch all users, or just one by username or uid." )
     def get( self, username=None, user_id=None ):
@@ -69,9 +69,14 @@ class UserRoute( Resource ):
         response.message = "General failure.  This is a bug and should be reported."
         return response.to_json(), 500
 
+
+
+@user_namespace.expect( user_update_schema( user_namespace ) )
+@user_namespace.route( '/id/<user_id>/details', methods=['PUT'] )
+class UserDetailsUpdateRoute( Resource ):
     @user_namespace.expect( user_update_schema( user_namespace ) )
     @user_namespace.doc( description="Update a user's details." )
-    def put(self, user_id):
+    def put( self, user_id ):
         json_data = request.json
 
         response = user_controller.update_user_details(
@@ -92,9 +97,8 @@ class UserRoute( Resource ):
         response.message = "General failure.  This is a bug and should be reported."
         return response.to_json(), 500
 
-
 @user_namespace.expect( password_update_schema( user_namespace ) )
-@user_namespace.route( '/password/<user_id>', methods=['PUT'] )
+@user_namespace.route( '/id/<user_id>/password', methods=['PUT'] )
 class PasswordUpdateRoute(Resource):
     @user_namespace.doc(description="Update a user's password.")
     def put(self, user_id):
