@@ -1,6 +1,7 @@
 from Core.UserLifecycle.StorageModels import *
 from Core.UserLifecycle.IO_Schemas import *
 from config import *
+from Core.Shared.ResponseSchema import *
 
 from sqlalchemy import exc
 
@@ -21,7 +22,10 @@ class UserLifeCycleController:
 
     def get_user_by_username( self, username ):
         user = UserModel.query.filter_by( username=username ).first()
-        return EResp( STATUS.SUCCESS, "Found the user.", user_schema.dumps( [ user ] ) )
+        if user is not None:
+            return EResp( STATUS.SUCCESS, "Found the user.", user_schema.dumps( [ user ] ) )
+        else:
+            return EResp( STATUS.DATA_CONFLICT, "User '{0}' does not exist.".format( username ), None )
 
     def create_user( self, username, email, password, first_name, last_name ):
         user = UserModel(
@@ -39,7 +43,7 @@ class UserLifeCycleController:
         except exc.IntegrityError as err:
             db.session.rollback()
             if err.orig.args[0] == 1062:
-                return EResp( STATUS.DATA_CONFLICT, "User already exists.", [ user ] )
+                return EResp( STATUS.DATA_CONFLICT, "User already exists.", user_schema.dumps( [ user ] ) )
             else:
                 return EResp( STATUS.FAILURE, "Couldn't create the user.  Report this.", user_schema.dumps( [ user ] ) )
 

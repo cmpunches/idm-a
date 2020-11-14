@@ -3,23 +3,18 @@ from Core.UserLifecycle.Engine import *
 from flask_restplus import Namespace, Resource
 from flask import request, url_for, redirect, send_file
 
-user_namespace = Namespace( 'user', description="User management functions." )
+user_namespace = Namespace( 'user', description="User Management Functions." )
 user_controller = UserLifeCycleController()
 
-
+# GET|POST /users
 @user_namespace.route( 's', methods=['GET', 'POST'] )
-@user_namespace.route( '/username/<username>', methods=['GET'] )
-@user_namespace.route( '/id/<user_id>', methods=['GET', 'DELETE'] )
-class UserRoute( Resource ):
-    @user_namespace.doc( description="Fetch all users, or just one by username or uid." )
-    def get( self, username=None, user_id=None ):
-        # retrieve one or all users
-        if username is not None:
-            response = user_controller.get_user_by_username( username )
-        elif user_id is not None:
-            response = user_controller.get_user_by_uid( user_id )
-        else:
-            response = user_controller.get_all_users()
+class UserPortfolio( Resource ):
+    @user_namespace.response( 200, "Users found.")
+    @user_namespace.response( 500, "General failure.")
+    @user_namespace.doc( description="Fetch all users" )
+    def get( self ):
+        # retrieve all users
+        response = user_controller.get_all_users()
 
         if response.status == STATUS.SUCCESS:
             return response.to_json(), 200
@@ -53,6 +48,26 @@ class UserRoute( Resource ):
         response.message = "General failure.  This is a bug and should be reported."
         return response.to_json(), 500
 
+
+@user_namespace.response( 404, "Username is not currently in use." )
+@user_namespace.response( 200, "Username found." )
+@user_namespace.route( '/username/<username>', methods=['GET'] )
+class UsernameRoute( Resource ):
+    @user_namespace.doc( description="Returns a user search by username.  This is intended as a convenience feature -- usernames are unique but mutable." )
+    def get(self, username ):
+        response = user_controller.get_user_by_username( username )
+
+        if response.status == STATUS.SUCCESS:
+            return response.to_json(), 200
+        if response.status == STATUS.DATA_CONFLICT:
+            return response.to_json(), 404
+
+        response.message = "General failure.  This is a bug and should be reported."
+        return response.to_json(), 500
+
+# GET|DELETE|PUT /id/$id
+@user_namespace.route( '/id/<user_id>', methods=['GET', 'DELETE', 'PUT'] )
+class UserIDRoute( Resource ):
     @user_namespace.response( 204, 'User has been disabled.' )
     @user_namespace.response( 409, 'User is already disabled.' )
     @user_namespace.doc( description="Deactivate a user." )
@@ -69,13 +84,8 @@ class UserRoute( Resource ):
         response.message = "General failure.  This is a bug and should be reported."
         return response.to_json(), 500
 
-
-
-@user_namespace.expect( user_update_schema( user_namespace ) )
-@user_namespace.route( '/id/<user_id>/details', methods=['PUT'] )
-class UserDetailsUpdateRoute( Resource ):
     @user_namespace.expect( user_update_schema( user_namespace ) )
-    @user_namespace.doc( description="Update a user's details." )
+    @user_namespace.doc( description="Update a user's details.  Cannot be used for password modification." )
     def put( self, user_id ):
         json_data = request.json
 
@@ -96,6 +106,7 @@ class UserDetailsUpdateRoute( Resource ):
 
         response.message = "General failure.  This is a bug and should be reported."
         return response.to_json(), 500
+
 
 @user_namespace.expect( password_update_schema( user_namespace ) )
 @user_namespace.route( '/id/<user_id>/password', methods=['PUT'] )
@@ -136,4 +147,3 @@ class EmailValidation(Resource):
 
         response.message = "General failure.  This is a bug and should be reported."
         return response.to_json(), 500
-
