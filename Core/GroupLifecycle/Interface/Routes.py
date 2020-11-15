@@ -9,7 +9,7 @@ group_controller = GroupLifeCycleController()
 
 
 @group_namespace.route( 's', methods=['GET', 'DELETE', 'POST'] )
-class GroupRoute( Resource ):
+class GroupPortfolioRoute(Resource):
     @group_namespace.response( 200, "Groups found." )
     @group_namespace.response( 500, "General failure." )
     @group_namespace.doc( description="List all groups.")
@@ -63,9 +63,12 @@ class GroupRoute( Resource ):
         return response.to_json(), 500
 
 
-@group_namespace.expect( group_membership_update_schema( group_namespace ) )
 @group_namespace.route( '/id/<group_id>' )
-class AddUserToGroupRoute( Resource ):
+class GroupMembershipRoute(Resource):
+    @group_namespace.response( 409, "That user is already in that group." )
+    @group_namespace.response( 404, "Either that user or that group (or both) do(es) not exist." )
+    @group_namespace.response( 201, "User successfully added to group." )
+    @group_namespace.expect(group_membership_update_schema(group_namespace))
     @group_namespace.doc( description='Add a user to a group.' )
     def post( self, group_id ):
         json_data = request.json
@@ -82,9 +85,21 @@ class AddUserToGroupRoute( Resource ):
         response.message = "General failure.  This is a bug and should be reported."
         return response.to_json(), 500
 
+    @group_namespace.response( 404, "Either that user or that group (or both) do(es) not exist." )
+    @group_namespace.response( 201, "User successfully removed from group." )
+    @group_namespace.expect(group_membership_update_schema(group_namespace))
     @group_namespace.doc( description='Remove a user from a group.' )
     def delete(self, group_id ):
-        return { "not": "implemented" }, 500
+        json_data = request.json
+        response = group_controller.remove_user_from_group( user_id=json_data['uid'], group_id=group_id )
+
+        if response.status == STATUS.DATA_CONFLICT:
+            return response.to_json(), 404
+        if response.status == STATUS.SUCCESS:
+            return response.to_json(), 201
+
+        response.message = "General failure.  This is a bug and should be reported."
+        return response.to_json(), 500
 
     @group_namespace.doc( description='List members of a group.' )
     def get( self, group_id ):
@@ -97,7 +112,7 @@ class AddUserToGroupRoute( Resource ):
 
 
 @group_namespace.route( 's/user_id/<user_id>' )
-class ListUserGroups( Resource ):
+class UserMembershipRoute(Resource):
     @group_namespace.doc( description='List all groups that a user is a member of.' )
     def get(self):
         return { "not": "implemented" }, 500
