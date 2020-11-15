@@ -34,7 +34,7 @@ class GroupPortfolioRoute(Resource):
 
         response = group_controller.delete_group( id=json_data['id'] )
 
-        if response.status == STATUS.DATA_CONFLICT:
+        if response.status == STATUS.NOT_FOUND:
             return response.to_json(), 404
         if response.status == STATUS.SUCCESS:
             return response.to_json(), 204
@@ -77,7 +77,7 @@ class GroupMembershipRoute(Resource):
 
         if response.status == STATUS.DATA_CONFLICT:
             return response.to_json(), 409
-        if response.status == STATUS.DATA_STRUCTURE:
+        if response.status == STATUS.NOT_FOUND:
             return response.to_json(), 404
         if response.status == STATUS.SUCCESS:
             return response.to_json(), 201
@@ -93,7 +93,7 @@ class GroupMembershipRoute(Resource):
         json_data = request.json
         response = group_controller.remove_user_from_group( user_id=json_data['uid'], group_id=group_id )
 
-        if response.status == STATUS.DATA_CONFLICT:
+        if response.status == STATUS.NOT_FOUND:
             return response.to_json(), 404
         if response.status == STATUS.SUCCESS:
             return response.to_json(), 201
@@ -107,7 +107,7 @@ class GroupMembershipRoute(Resource):
     def get( self, group_id ):
         response = group_controller.get_group_members( id=group_id )
 
-        if response.status == STATUS.DATA_CONFLICT:
+        if response.status == STATUS.NOT_FOUND:
             return response.to_json(), 404
         if response.status == STATUS.SUCCESS:
             return response.to_json(), 200
@@ -118,11 +118,29 @@ class GroupMembershipRoute(Resource):
     @group_namespace.expect( group_update_schema( group_namespace ) )
     @group_namespace.doc( description='Modify the details of a group.' )
     def put(self, group_id ):
-        return { "not": "implemented" }, 500
+        json_data = request.json
+
+        response = group_controller.update_group_details( gid=group_id, group_name=json_data['groupname'] )
+
+        if response.status == STATUS.NOT_FOUND:
+            return response.to_json(), 404
+        if response.status == STATUS.SUCCESS:
+            return response.to_json(), 201
+
+        response.message = "General failure.  This is a bug and should be reported."
+        return response.to_json(), 500
 
 
 @group_namespace.route( 's/user_id/<user_id>' )
 class UserMembershipRoute(Resource):
     @group_namespace.doc( description='List all groups that a user is a member of.' )
-    def get(self):
-        return { "not": "implemented" }, 500
+    def get(self, user_id ):
+        response = group_controller.get_associated_groups( user_id=user_id )
+
+        if response.status == STATUS.NOT_FOUND:
+            return response.to_json(), 404
+        if response.status == STATUS.SUCCESS:
+            return response.to_json(), 200
+
+        response.message = "General failure.  This is a bug and should be reported."
+        return response.to_json(), 500

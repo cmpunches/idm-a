@@ -46,7 +46,7 @@ class GroupLifeCycleController:
             if err.orig.args[0] == 1062:
                 return EResp( STATUS.DATA_CONFLICT, "User is already in this group.", resp_attache )
             if err.orig.args[0] == 1452:
-                return EResp( STATUS.DATA_STRUCTURE, "Either that user or that group does not exist!", resp_attache )
+                return EResp( STATUS.NOT_FOUND, "Either that user or that group does not exist!", resp_attache )
 
         return EResp( STATUS.SUCCESS, "User added to group.", resp_attache )
 
@@ -59,7 +59,16 @@ class GroupLifeCycleController:
 
             return EResp( STATUS.SUCCESS, "UID '{0}' removed from GID '{1}'".format( user_id, group_id ), None )
         else:
-            return EResp( STATUS.DATA_CONFLICT, "UID '{0}' is not in GID '{1}'!".format( user_id, group_id ), None )
+            return EResp( STATUS.NOT_FOUND, "UID '{0}' is not in GID '{1}'!".format( user_id, group_id ), None )
+
+    def get_associated_groups(self, user_id ):
+        user = UserModel.query.get( user_id )
+
+        if user is not None:
+            resp_attach = group_schema.dumps( user.groups )
+            return EResp( STATUS.SUCCESS, "Groups found for user.", resp_attach )
+        else:
+            return EResp( STATUS.NOT_FOUND, "User ID is not found.", None )
 
     def delete_group( self, id ):
         group = GroupModel.query.filter_by( id=id ).first()
@@ -69,11 +78,12 @@ class GroupLifeCycleController:
 
             group.members = []
             db.session.delete( group )
+            # need a try/catch block here
             db.session.commit()
 
             return EResp( STATUS.SUCCESS, "Group deleted.", resp_attache )
         else:
-            return EResp( STATUS.DATA_CONFLICT, "This group does not exist.", None )
+            return EResp( STATUS.NOT_FOUND, "This group does not exist.", None )
 
     def get_group_members(self, id ):
         group = GroupModel.query.filter_by( id=id ).first()
@@ -83,5 +93,18 @@ class GroupLifeCycleController:
             resp_attache = user_schema.dumps( members )
             return EResp( STATUS.SUCCESS, "Group members found.", resp_attache )
         else:
-            return EResp( STATUS.DATA_CONFLICT, "No group found.", None )
+            return EResp( STATUS.NOT_FOUND, "No group found.", None )
 
+    def update_group_details(self, gid, group_name ):
+        group = GroupModel.query.get( gid )
+
+        resp_attache = group_schema.dumps( [ group ] )
+        if group is not None:
+            if group.name != group_name:
+                group.name = group_name
+                # need a try/catch block here
+                db.session.commit()
+        else:
+            return EResp( STATUS.NOT_FOUND, "Group not found!", None )
+
+        return EResp( STATUS.SUCCESS, "Group updated.", group )
