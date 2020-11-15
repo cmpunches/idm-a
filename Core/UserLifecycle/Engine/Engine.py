@@ -173,7 +173,7 @@ class UserLifeCycleController:
     def send_validation_email(self, recipient, code):
         user = UserModel.query.filter_by( email=recipient ).first()
 
-        url = "{0}/user/verify/{1}".format(
+        url = "{0}/user/verify_email/{1}".format(
             BASE_API_MASK,
             code
         )

@@ -23,7 +23,7 @@ class UserPortfolio( Resource ):
         return response.to_json(), 500
 
     @user_namespace.expect( user_creation_schema( user_namespace ) )
-    @user_namespace.response( 201, 'User Created.')
+    @user_namespace.response( 201, 'User created.')
     @user_namespace.response( 409, 'User already exists.' )
     @user_namespace.doc( description="Create a user." )
     def post(self):
@@ -131,10 +131,10 @@ class PasswordUpdateRoute(Resource):
         return response.to_json(), 500
 
 
-@user_namespace.route('/verify/<code>')
+@user_namespace.route('/verify_email/<code>')
 class EmailValidation(Resource):
     @user_namespace.response( 404, 'Invalid email verification code.' )
-    @user_namespace.response( 202, 'The user\'s email is now verified' )
+    @user_namespace.response( 202, 'The user\'s email is now verified.' )
     @user_namespace.doc( description="Verify a user's email validation code." )
     def get( self, code ):
 
