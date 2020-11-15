@@ -101,9 +101,19 @@ class GroupMembershipRoute(Resource):
         response.message = "General failure.  This is a bug and should be reported."
         return response.to_json(), 500
 
+    @group_namespace.response( 404, "Group not found." )
+    @group_namespace.response( 200, "Found group members." )
     @group_namespace.doc( description='List members of a group.' )
     def get( self, group_id ):
-        return { "not": "implemented" }, 500
+        response = group_controller.get_group_members( id=group_id )
+
+        if response.status == STATUS.DATA_CONFLICT:
+            return response.to_json(), 404
+        if response.status == STATUS.SUCCESS:
+            return response.to_json(), 200
+
+        response.message = "General failure.  This is a bug and should be reported."
+        return response.to_json(), 500
 
     @group_namespace.expect( group_update_schema( group_namespace ) )
     @group_namespace.doc( description='Modify the details of a group.' )

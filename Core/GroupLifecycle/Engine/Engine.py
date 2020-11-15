@@ -1,5 +1,6 @@
 from Core.GroupLifecycle.StorageModels import *
 from Core.GroupLifecycle.IO_Schemas import *
+from Core.UserLifecycle.IO_Schemas import *
 from config import *
 from Core.Shared.ResponseSchema import *
 
@@ -73,3 +74,14 @@ class GroupLifeCycleController:
             return EResp( STATUS.SUCCESS, "Group deleted.", resp_attache )
         else:
             return EResp( STATUS.DATA_CONFLICT, "This group does not exist.", None )
+
+    def get_group_members(self, id ):
+        group = GroupModel.query.filter_by( id=id ).first()
+
+        if group is not None:
+            members = group.members
+            resp_attache = user_schema.dumps( members )
+            return EResp( STATUS.SUCCESS, "Group members found.", resp_attache )
+        else:
+            return EResp( STATUS.DATA_CONFLICT, "No group found.", None )
+
