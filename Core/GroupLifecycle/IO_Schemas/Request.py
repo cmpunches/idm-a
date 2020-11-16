@@ -31,6 +31,6 @@ def group_delete_schema( api ):
     return api.model(
         "Group Deletion Schema",
         {
-            "id": fields.Integer( description="The group ID of the group to delete." )
+            "id": fields.Integer( description="The group ID of the group to delete.")
         }
     )
