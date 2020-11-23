@@ -15,6 +15,7 @@ class STATUS(Enum):
     SUCCESS         = auto()
     DATA_CONFLICT   = auto()
     DATA_STRUCTURE  = auto()
+    NOT_AUTHORIZED  = auto()
     NOT_FOUND       = auto()
     FAILURE         = auto()
 

@@ -1,9 +1,9 @@
 from Core.Shared.DB import db
-from Core.GroupLifecycle.StorageModels import *
 from datetime import datetime
 import uuid
 from sqlalchemy_serializer import SerializerMixin
-
+import Core.GroupLifecycle.StorageModels.Models
+#import Core.SessionLifecycle.StorageModels.Models
 
 def gen_uuid4():
     return str( uuid.uuid4() )
@@ -11,7 +11,7 @@ def gen_uuid4():
 
 # user representation to the ORM
 class UserModel( db.Model, SerializerMixin ):
-    __tablename__ = 'users'
+    __tablename__ = 'usersZ'
 
     id          = db.Column( db.Integer,        primary_key=True                        )
     username    = db.Column( db.String(80),     unique=True,        nullable=False      )
@@ -21,7 +21,8 @@ class UserModel( db.Model, SerializerMixin ):
     first_name  = db.Column( db.String(50),                         nullable=False      )
     last_name   = db.Column( db.String(50),                         nullable=False      )
     active      = db.Column( db.Boolean,                            default=True        )
-    groups = db.relationship( 'GroupModel', secondary='group_membership', cascade="all, delete" )
+    groups = db.relationship("groups", secondary='group_membership', cascade="all, delete")
+#    sessions = db.relationship( 'sessions', cascade="all, delete" )
 
 #    def __repr__(self):
 #        return json.dumps( self.to_dict() )
@@ -40,3 +41,4 @@ class EmailValidationModel( db.Model, SerializerMixin ):
 
 #    def __repr__(self):
 #        return json.dumps( self.to_dict() )
+

@@ -3,6 +3,7 @@ werkzeug.cached_property = werkzeug.utils.cached_property
 
 from Core.Shared.API import create_api
 from Core.Shared.APP import create_app
+
 from Core.UserLifecycle.Interface import *
 from Core.GroupLifecycle.Interface import *
 from Core.SessionLifecycle.Interface import *

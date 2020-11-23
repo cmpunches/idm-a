@@ -108,3 +108,13 @@ class GroupLifeCycleController:
             return EResp( STATUS.NOT_FOUND, "Group not found!", None )
 
         return EResp( STATUS.SUCCESS, "Group updated.", group )
+
+    # is the provided session associated with a user in group X?
+    def group_in_context( self, context, group ):
+        user = context.assoc_user
+        membership = user.groups
+
+        if group in membership:
+            return True
+        else:
+            return False

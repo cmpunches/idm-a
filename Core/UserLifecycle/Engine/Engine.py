@@ -7,12 +7,14 @@ from sqlalchemy import exc
 
 import smtplib, ssl
 
+# USER ENGINE
+
 
 class UserLifeCycleController:
     def __init__(self):
         pass
 
-    def get_all_users( self ):
+    def get_all_users( self, token ):
         users = UserModel.query.all()
         return EResp( STATUS.SUCCESS, "Dumping ALL users.", user_schema.dumps( users ) )
 

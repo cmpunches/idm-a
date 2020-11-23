@@ -1,20 +1,47 @@
 from Core.UserLifecycle.Engine import *
-
+from Core.SessionLifecycle.Engine import *
 from flask_restplus import Namespace, Resource
 from flask import request, url_for, redirect, send_file
 
 user_namespace = Namespace( 'user', description="User Management Functions." )
+
 user_controller = UserLifeCycleController()
+session_controller = SessionLifeCycleController()
+
+from functools import wraps
+
+# sessions will be required at route interface first....but validation and authorization checks will take place in the
+# engine to maintain separation of concerns....a decorator can be used to require a token and then a session object can be passed
+# to the engine as context
+
+
+def session_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = None
+
+        if 'SESSION_ID' in request.headers:
+            token = request.headers['SESSION_ID']
+
+        if not token:
+            return EResp( STATUS.NOT_AUTHORIZED, "This action requires at least an active session.", token ).to_json(), 403
+
+        return f(*args, **kwargs)
+    return decorated
+
 
 # GET|POST /users
 @user_namespace.route( 's', methods=['GET', 'POST'] )
 class UserPortfolio( Resource ):
     @user_namespace.response( 200, "Users found.")
+    @user_namespace.response( 403, "Forbidden context.")
     @user_namespace.response( 500, "General failure.")
     @user_namespace.doc( description="Fetch all users" )
+    @user_namespace.doc( security='SESSION_ID' )
+    @session_required
     def get( self ):
         # retrieve all users
-        response = user_controller.get_all_users()
+        response = user_controller.get_all_users( request.headers['SESSION_ID'] )
 
         if response.status == STATUS.SUCCESS:
             return response.to_json(), 200
@@ -51,6 +78,7 @@ class UserPortfolio( Resource ):
 
 @user_namespace.response( 404, "Username is not currently in use." )
 @user_namespace.response( 200, "Username found." )
+@user_namespace.doc(security='session,users_group')
 @user_namespace.route( '/username/<username>', methods=['GET'] )
 class UsernameRoute( Resource ):
     @user_namespace.doc( description="Returns a user search by username.  This is intended as a convenience feature -- usernames are unique but mutable." )
@@ -71,6 +99,7 @@ class UserIDRoute( Resource ):
     @user_namespace.response( 204, 'User has been disabled.' )
     @user_namespace.response( 409, 'User is already disabled.' )
     @user_namespace.doc( description="Deactivate a user." )
+    @user_namespace.doc( security='session,users_group,self_only,imda_admins_group')
     def delete( self, user_id ):
         response = user_controller.deactivate_user( user_id )
 
@@ -86,6 +115,7 @@ class UserIDRoute( Resource ):
 
     @user_namespace.expect( user_update_schema( user_namespace ) )
     @user_namespace.doc( description="Update a user's details.  Cannot be used for password modification." )
+    @user_namespace.doc( security='session,users_group,self_only,idma_admins_group')
     def put( self, user_id ):
         json_data = request.json
 
