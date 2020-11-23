@@ -11,7 +11,7 @@ def gen_uuid4():
 
 # user representation to the ORM
 class UserModel( db.Model, SerializerMixin ):
-    __tablename__ = 'usersZ'
+    __tablename__ = 'users'
 
     id          = db.Column( db.Integer,        primary_key=True                        )
     username    = db.Column( db.String(80),     unique=True,        nullable=False      )
@@ -21,11 +21,8 @@ class UserModel( db.Model, SerializerMixin ):
     first_name  = db.Column( db.String(50),                         nullable=False      )
     last_name   = db.Column( db.String(50),                         nullable=False      )
     active      = db.Column( db.Boolean,                            default=True        )
-    groups = db.relationship("groups", secondary='group_membership', cascade="all, delete")
+    groups = db.relationship( 'GroupModel', secondary='group_membership', cascade="all, delete")
 #    sessions = db.relationship( 'sessions', cascade="all, delete" )
-
-#    def __repr__(self):
-#        return json.dumps( self.to_dict() )
 
 
 class EmailValidationModel( db.Model, SerializerMixin ):
@@ -38,7 +35,4 @@ class EmailValidationModel( db.Model, SerializerMixin ):
     timestamp   = db.Column( db.DateTime, default=datetime.now )
     email       = db.Column( db.String(120), db.ForeignKey('users.email'), nullable=False, unique=True )
     code        = db.Column( db.String(36), unique=True, default=gen_uuid4 )
-
-#    def __repr__(self):
-#        return json.dumps( self.to_dict() )
 
