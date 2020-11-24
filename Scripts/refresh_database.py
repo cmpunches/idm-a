@@ -1,11 +1,14 @@
 import werkzeug
 werkzeug.cached_property = werkzeug.utils.cached_property
 
-from Core.Shared.APP import create_app
+from Core.SessionLifecycle.StorageModels.Models import SessionModel
+from Core.GroupLifecycle.StorageModels.Models import GroupModel, GroupMembershipModel
+from Core.UserLifecycle.StorageModels.Models import UserModel, EmailValidationModel
 
-from Core.UserLifecycle.StorageModels import *
-from Core.GroupLifecycle.StorageModels import *
-from Core.SessionLifecycle.StorageModels import *
+
+from Core.Shared.APP import create_app
+from Core.Shared.DB import db
+
 
 app = create_app('config.py')
 

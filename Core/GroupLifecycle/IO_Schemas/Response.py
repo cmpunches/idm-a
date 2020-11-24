@@ -1,4 +1,4 @@
-from ..StorageModels import *
+from Core.GroupLifecycle.StorageModels.Models import *
 
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
 

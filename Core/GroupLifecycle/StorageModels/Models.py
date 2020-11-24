@@ -1,5 +1,3 @@
-# https://docs.sqlalchemy.org/en/13/orm/cascades.html#using-delete-cascade-with-many-to-many-relationships
-
 from Core.Shared.DB import db
 from sqlalchemy_serializer import SerializerMixin
 
@@ -12,6 +10,7 @@ class GroupMembershipModel( db.Model, SerializerMixin ):
     )
 
     id = db.Column( db.Integer, primary_key=True )
+
     group_id = db.Column( db.Integer, db.ForeignKey('groups.id' ), nullable=False )
     assoc_uid = db.Column( db.Integer, db.ForeignKey('users.id' ), nullable=False )
 
@@ -21,6 +20,6 @@ class GroupModel( db.Model, SerializerMixin ):
 
     id = db.Column( db.Integer, primary_key=True )
     name = db.Column( db.String(80), unique=True, nullable=False )
-    members = db.relationship( "UserModel", secondary='group_membership', cascade="all, delete")
+    members = db.relationship( "UserModel", secondary='group_membership', cascade="all, delete", back_populates="groups" )
 
 
