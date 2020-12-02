@@ -10,7 +10,8 @@ from Core.UserLifecycle.Interface import *
 from Core.GroupLifecycle.Interface import *
 from Core.SessionLifecycle.Interface import *
 
-app = create_app('Core/Shared/config.py')
+app = create_app()
+
 api = create_api( app )
 
 api.add_namespace( user_namespace )

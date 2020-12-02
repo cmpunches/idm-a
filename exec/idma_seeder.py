@@ -7,7 +7,8 @@ werkzeug.cached_property = werkzeug.utils.cached_property
 
 from Core.Shared.APP import create_app
 
-app = create_app( 'Core/Shared/config.py' )
+app = create_app()
+
 
 def Main():
 

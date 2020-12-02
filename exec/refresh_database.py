@@ -10,7 +10,7 @@ from Core.Shared.APP import create_app
 from Core.Shared.DB import db
 
 
-app = create_app( 'Core/Shared/config.py' )
+app = create_app()
 
 
 def refresh_database():
