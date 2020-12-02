@@ -10,4 +10,6 @@ Management scripts and tests exist in the 'exec' directory.  They are executed u
 
 	$ python3 -m exec.{SCRIPT_NAME}
 
+Like every other piece of IDM/A, the management scripts and tests all assume an execution context / working directory of the project root.
+
 
