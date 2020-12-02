@@ -1,6 +1,8 @@
 import werkzeug
 werkzeug.cached_property = werkzeug.utils.cached_property
 
+# Execution context MUST be the project root directory
+
 from Core.Shared.API import create_api
 from Core.Shared.APP import create_app
 

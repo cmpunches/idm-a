@@ -5,11 +5,9 @@ import sys
 import werkzeug
 werkzeug.cached_property = werkzeug.utils.cached_property
 
+from Core.Shared.APP import create_app
 
-
-def get_config_group( conf_file ):
-    impmod = __import__( conf_file )
-    return impmod.IDMA_ADMIN_GROUP
+app = create_app( 'Core/Shared/config.py' )
 
 def Main():
 
