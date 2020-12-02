@@ -8,6 +8,6 @@ IDM/A can be a replacement for the primary component in big bulky systems that d
 
 Management scripts and tests exist in the 'exec' directory.  They are executed using the following means:
 
-python3 -m exec.{SCRIPT_NAME}
+	$ python3 -m exec.{SCRIPT_NAME}
 
 
