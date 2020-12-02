@@ -1,0 +1,42 @@
+#!/usr/bin/env python3
+# Script that will seed the admin group and admin user.
+import argparse
+import sys
+import werkzeug
+werkzeug.cached_property = werkzeug.utils.cached_property
+
+
+
+def get_config_group( conf_file ):
+    impmod = __import__( conf_file )
+    return impmod.IDMA_ADMIN_GROUP
+
+def Main():
+
+    parser = argparse.ArgumentParser(
+        description="Injects a user into the group configured to manage your IDM/A instance.",
+        prog="idma_seeder",
+        epilog="Designed and implemented by Chris Punches.\nSILO GROUP, LLC 2020.  ALL RIGHTS RESERVED."
+    )
+
+    required_args = parser.add_argument_group("required arguments")
+    required_args.add_argument( "-c", "--config_file", help="The config file path for your IDMA instance.", required=True )
+
+    required_args.add_argument( "-u", "--username", help="The username of the new root user.", required=True )
+    required_args.add_argument( "-e", "--email", help="The email of the new root user.", required=True )
+    required_args.add_argument( "-p", "--password", help="The password of the new root user.", required=True )
+    required_args.add_argument( "-f", "--first-name", help="The first name of the new root user.", required=True )
+    required_args.add_argument( "-l", "--last-name", help="The last name of the new root user.", required=True )
+
+    args = parser.parse_args()
+
+    if len( sys.argv ) != 13:
+        parser.print_help()
+        exit(1)
+
+
+    if args.username and args.email and args.password and args.first_name and args.last_name:
+        print("can create user in group '{0}'".format( get_config_group( args.config_file ) ))
+
+if __name__=='__main__':
+    Main()
