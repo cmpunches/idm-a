@@ -1,7 +1,5 @@
-from Core.GroupLifecycle.StorageModels import *
 from Core.GroupLifecycle.IO_Schemas import *
 from Core.UserLifecycle.IO_Schemas import *
-from config import *
 from Core.Shared.ResponseSchema import *
 
 from sqlalchemy import exc
