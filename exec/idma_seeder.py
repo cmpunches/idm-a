@@ -69,8 +69,6 @@ def Main():
         user_get_result = uc.get_user_by_email( email=args.email )
         user = json.loads( user_get_result.attachment )[0]
 
-        print("shit")
-
         add_user_to_admin_group_result = gc.add_user_to_group( user.id, group.id )
 
         if add_user_to_admin_group_result.status == STATUS.SUCCESS:

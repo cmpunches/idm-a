@@ -76,7 +76,7 @@ class UserLifeCycleController:
         except exc.IntegrityError as err:
             db.session.rollback()
             if err.orig.args[0] == 1062:
-                return EResp( STATUS.DATA_CONFLICT, "User with email '' already exists.".format(user.email), user_schema.dumps( [ user ] ) )
+                return EResp( STATUS.DATA_CONFLICT, "User with email '{0}' already exists.".format(user.email), user_schema.dumps( [ user ] ) )
             else:
                 return EResp( STATUS.FAILURE, "Couldn't create the user.  Report this.", user_schema.dumps( [ user ] ) )
 
