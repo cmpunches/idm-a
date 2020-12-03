@@ -5,7 +5,7 @@ from Core import *
 import json
 
 
-app = create_app('config.py')
+app = create_app('Config.py')
 
 
 def add_groups():

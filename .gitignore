@@ -1,4 +1,4 @@
-Core/Shared/config.py
+Core/Shared/Config.py
 .idea
 venv
 __pycache__/

@@ -1,17 +1,36 @@
 from Core.UserLifecycle.IO_Schemas import *
-from Core.Shared.config import *
+from Core.Shared.Config import *
 from Core.Shared.ResponseSchema import *
 
 from sqlalchemy import exc
 
-import smtplib, ssl
+import smtplib, ssl, re
 
 # USER ENGINE
 
 
 class UserLifeCycleController:
-    def __init__(self):
-        pass
+    def __init__(self, context_sensitive=True):
+        # False is root -- bypasses access control checks in group and requires no session
+        self.session_aware=context_sensitive
+
+    def user_data_valid(self, user):
+        if not ( re.search( idma_conf.user_security['email_pattern'], user.email ) ):
+            print("Bad email.")
+            return False
+        if not ( re.search( idma_conf.user_security['username_pattern'], user.username ) ):
+            print("Bad username.")
+            return False
+        if not ( re.search( idma_conf.user_security['password_pattern'], user.password ) ):
+            print("Bad password.")
+            return False
+        if not ( re.search( idma_conf.user_security['name_pattern'], user.first_name ) ):
+            print("Bad first name.")
+            return False
+        if not ( re.search( idma_conf.user_security['name_pattern'], user.last_name ) ):
+            print("Bad last name.")
+            return False
+        return True
 
     def get_all_users( self, token ):
         users = UserModel.query.all()
@@ -28,7 +47,16 @@ class UserLifeCycleController:
         else:
             return EResp( STATUS.DATA_CONFLICT, "User '{0}' does not exist.".format( username ), None )
 
-    def create_user( self, username, email, password, first_name, last_name ):
+    def get_user_by_email( self, email ):
+        user = UserModel.query.filter_by( email=email ).first()
+        if user is not None:
+            return EResp( STATUS.SUCCESS, "Found the user.", user_schema.dumps( [ user ] ) )
+        else:
+            return EResp( STATUS.DATA_CONFLICT, "User '{0}' does not exist.".format( username ), None )
+
+    def create_user( self, username, email, password, first_name, last_name, context=None ):
+        # add context checks
+
         user = UserModel(
             username=username,
             email=email,
@@ -37,14 +65,18 @@ class UserLifeCycleController:
             last_name=last_name
         )
 
+        if not self.user_data_valid(user):
+            return EResp( STATUS.FAILURE, "One or more bad user values.", user_schema.dumps( [ user ] ) )
+
         db.session.add(user)
 
         try:
-            db.session.commit()
+            hell = db.session.commit()
+            print("hell")
         except exc.IntegrityError as err:
             db.session.rollback()
             if err.orig.args[0] == 1062:
-                return EResp( STATUS.DATA_CONFLICT, "User already exists.", user_schema.dumps( [ user ] ) )
+                return EResp( STATUS.DATA_CONFLICT, "User with email '' already exists.".format(user.email), user_schema.dumps( [ user ] ) )
             else:
                 return EResp( STATUS.FAILURE, "Couldn't create the user.  Report this.", user_schema.dumps( [ user ] ) )
 

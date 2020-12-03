@@ -6,8 +6,9 @@ from sqlalchemy import exc
 
 
 class GroupLifeCycleController:
-    def __init__(self):
-        pass
+    def __init__(self, context_sensitive=True):
+        # False is root
+        self.session_aware = context_sensitive
 
     def get_all_groups(self):
         groups = GroupModel.query.all()
@@ -113,6 +114,14 @@ class GroupLifeCycleController:
         membership = user.groups
 
         if group in membership:
+            return True
+        else:
+            return False
+
+    def group_exists(self, group_name, context=None ):
+        group = GroupModel.query.filter_by( name=group_name ).first()
+
+        if group is not None:
             return True
         else:
             return False

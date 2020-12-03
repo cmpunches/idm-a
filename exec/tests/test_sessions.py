@@ -9,7 +9,7 @@ from Core.GroupLifecycle.Engine import *
 import json
 
 
-app = create_app('config.py')
+app = create_app('Config.py')
 
 def populate_sessions():
     with app.app_context():

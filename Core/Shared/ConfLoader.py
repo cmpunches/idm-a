@@ -3,13 +3,14 @@ from configparser import ConfigParser
 
 class IDMA_Conf:
     def __init__(self, conf_path ):
-        ini_parser = ConfigParser()
+        ini_parser = ConfigParser(interpolation=None)
         ini_parser.read( conf_path )
 
         self.database = dict()
         self.email = dict()
         self.orientation = dict()
         self.session = dict()
+        self.user_security = dict()
         self.administration = dict()
 
         self.database['driver'] = ini_parser.get('database', 'driver')
@@ -28,5 +29,10 @@ class IDMA_Conf:
         self.orientation['site_name'] = ini_parser.get( 'orientation', 'site_name' )
 
         self.session['TTL'] = ini_parser.get( 'sessions', 'TTL' )
+
+        self.user_security['email_pattern'] = ini_parser.get( 'user_security', 'email_regex' )
+        self.user_security['username_pattern'] = ini_parser.get( 'user_security', 'username_regex' )
+        self.user_security['password_pattern'] = ini_parser.get( 'user_security', 'password_regex' )
+        self.user_security['name_pattern'] = ini_parser.get( 'user_security', 'name_regex')
 
         self.administration['admin_group'] = ini_parser.get( 'administration', 'admin_group' )

@@ -34,7 +34,7 @@ class UserModel( db.Model, SerializerMixin ):
 
 
 class EmailValidationModel( db.Model, SerializerMixin ):
-    __tablename__ = 'email_validation'
+    __tablename__ = 'email_verification'
     # each entry gets an index
     # a timestamp so we can expire them as they get old
     # tie the email it's associated with to an actual user's email to prevent $CRIME

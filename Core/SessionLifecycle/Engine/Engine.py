@@ -1,4 +1,4 @@
-from Core.Shared.config import *
+from Core.Shared.Config import *
 import datetime
 from sqlalchemy import or_
 
