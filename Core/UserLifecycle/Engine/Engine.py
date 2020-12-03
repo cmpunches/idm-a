@@ -71,8 +71,7 @@ class UserLifeCycleController:
         db.session.add(user)
 
         try:
-            hell = db.session.commit()
-            print("hell")
+            db.session.commit()
         except exc.IntegrityError as err:
             db.session.rollback()
             if err.orig.args[0] == 1062:

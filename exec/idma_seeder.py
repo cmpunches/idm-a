@@ -39,13 +39,12 @@ def Main():
             print("Group '{0}' does NOT exist.  Preparing to inject group.".format( admin_group ) )
             group_creation_result = gc.create_group( admin_group )
             if group_creation_result.status == STATUS.SUCCESS:
-                print("Group injected.")
-                group_obj = group_creation_result.attachment
-                group = group_schema.loads(group_obj)
+                group = json.loads( group_creation_result.attachment )[0]
+                print("Group named '{0}' injected.".format( group['name'] ))
+
             else:
                 print( group_creation_result.message )
                 exit(1)
-
 
         # Create the user.  If it already exists, just add it to the group anyway.
         user_creation_result = uc.create_user(
@@ -66,13 +65,12 @@ def Main():
             exit(1)
 
         # add user to group
-        user_get_result = uc.get_user_by_email( email=args.email )
-        user = json.loads( user_get_result.attachment )[0]
+        user = json.loads( user_creation_result.attachment )[0]
 
-        add_user_to_admin_group_result = gc.add_user_to_group( user.id, group.id )
+        add_user_to_admin_group_result = gc.add_user_to_group( user['id'], group['id'] )
 
         if add_user_to_admin_group_result.status == STATUS.SUCCESS:
-            print("User '{0}' has now been injected into the group '{1}'.".format( user.email, group.name ))
+            print("User '{0}' has now been injected into the group '{1}'.".format( user['email'], group['name'] ))
         else:
             print( add_user_to_admin_group_result.message )
             exit(1)

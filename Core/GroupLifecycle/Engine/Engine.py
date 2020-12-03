@@ -19,10 +19,9 @@ class GroupLifeCycleController:
 
         db.session.add(group)
 
-        resp_attache = group_schema.dumps( [ group ] )
-
         try:
             db.session.commit()
+            resp_attache = group_schema.dumps( [ group ] )
         except exc.IntegrityError as err:
             if err.orig.args[0] == 1062:
                 db.session.rollback()
@@ -36,14 +35,14 @@ class GroupLifeCycleController:
 
         db.session.add( group_association )
 
-        resp_attache = json.dumps( group_association.to_dict(), indent=4, sort_keys=True )
 
         try:
             db.session.commit()
+            resp_attache = json.dumps( group_association.to_dict(), indent=4, sort_keys=True )
         except exc.IntegrityError as err:
             db.session.rollback()
             if err.orig.args[0] == 1062:
-                return EResp( STATUS.DATA_CONFLICT, "User is already in this group.", resp_attache )
+                return EResp( STATUS.DATA_CONFLICT, "User is already in this group.", None )
             if err.orig.args[0] == 1452:
                 return EResp( STATUS.NOT_FOUND, "Either that user or that group does not exist!", resp_attache )
 
