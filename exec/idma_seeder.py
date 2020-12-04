@@ -35,6 +35,8 @@ def Main():
         # Check if the group exists.  If not, create it.  Bail if anything fails.
         if gc.group_exists( group_name=admin_group ):
             print("Group '{0}' already exists.".format( admin_group ) )
+            group_obj = GroupModel.query.filter_by( name=admin_group )
+            group = json.loads( group_schema.dumps( group_obj ))[0]
         else:
             print("Group '{0}' does NOT exist.  Preparing to inject group.".format( admin_group ) )
             group_creation_result = gc.create_group( admin_group )
@@ -60,6 +62,7 @@ def Main():
             print( "Created user '{0}' with email '{1}'.".format( args.username, args.email ) )
         elif user_creation_result.status == STATUS.DATA_CONFLICT:
             print( user_creation_result.message )
+            exit(1)
         else:
             print( user_creation_result.message )
             exit(1)
@@ -70,7 +73,7 @@ def Main():
         add_user_to_admin_group_result = gc.add_user_to_group( user['id'], group['id'] )
 
         if add_user_to_admin_group_result.status == STATUS.SUCCESS:
-            print("User '{0}' has now been injected into the group '{1}'.".format( user['email'], group['name'] ))
+            print("User '{0}' has been injected into the group '{1}'.".format( user['email'], group['name'] ))
         else:
             print( add_user_to_admin_group_result.message )
             exit(1)

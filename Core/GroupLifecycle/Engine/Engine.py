@@ -38,15 +38,14 @@ class GroupLifeCycleController:
 
         try:
             db.session.commit()
-            resp_attache = json.dumps( group_association.to_dict(), indent=4, sort_keys=True )
         except exc.IntegrityError as err:
             db.session.rollback()
             if err.orig.args[0] == 1062:
                 return EResp( STATUS.DATA_CONFLICT, "User is already in this group.", None )
             if err.orig.args[0] == 1452:
-                return EResp( STATUS.NOT_FOUND, "Either that user or that group does not exist!", resp_attache )
+                return EResp( STATUS.NOT_FOUND, "Either that user or that group does not exist!", json.dumps( group_association.to_dict(), indent=4, sort_keys=True ) )
 
-        return EResp( STATUS.SUCCESS, "User added to group.", resp_attache )
+        return EResp( STATUS.SUCCESS, "User added to group.", json.dumps( group_association.to_dict(), indent=4, sort_keys=True ) )
 
     def remove_user_from_group(self, user_id, group_id):
         group_association = GroupMembershipModel.query.filter_by( assoc_uid=user_id, group_id=group_id ).first()

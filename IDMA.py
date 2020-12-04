@@ -1,7 +1,5 @@
-
 # Execution context MUST be the project root directory
 from Core import *
-
 
 app = create_app()
 
