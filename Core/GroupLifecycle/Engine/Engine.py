@@ -21,13 +21,12 @@ class GroupLifeCycleController:
 
         try:
             db.session.commit()
-            resp_attache = group_schema.dumps( [ group ] )
         except exc.IntegrityError as err:
             if err.orig.args[0] == 1062:
                 db.session.rollback()
-                return EResp( STATUS.DATA_CONFLICT, "Group already exists.", resp_attache )
+                return EResp( STATUS.DATA_CONFLICT, "Group already exists.", group_schema.dumps( [ group ] ) )
 
-        return EResp( STATUS.SUCCESS, "Group successfully created.", resp_attache )
+        return EResp( STATUS.SUCCESS, "Group successfully created.", group_schema.dumps( [ group ] ) )
 
     def add_user_to_group(self, user_id, group_id ):
         # adds an existing user to an existing group
