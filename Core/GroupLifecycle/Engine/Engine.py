@@ -122,3 +122,11 @@ class GroupLifeCycleController:
             return True
         else:
             return False
+
+    def get_group_by_name(self, group_name, context=None ):
+        group = GroupModel.query.filter_by( name=group_name ).first()
+
+        if group is not None:
+            return EResp( STATUS.SUCCESS, "Sending group details.", group_schema.dumps( [ group ] ))
+        else:
+            return EResp( STATUS.NOT_FOUND, "Group does not exist.", group_name )

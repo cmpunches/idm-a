@@ -6,12 +6,16 @@ import sys, json
 from Core import *
 
 
+def deserialize( schema, jsonobj ):
+    jd = json.loads( jsonobj )
+    return schema.load( jd, session=db.session )
+
 def Main():
     app = create_app()
 
     parser = argparse.ArgumentParser(
         description="Injects a user into the group configured to manage your IDM/A instance.",
-        prog="idma_seeder",
+        prog="python3 -m exec.idma_seeder",
         epilog="Designed and implemented by Chris Punches.\nSILO GROUP, LLC 2020.  ALL RIGHTS RESERVED."
     )
 
@@ -30,16 +34,24 @@ def Main():
         uc = UserLifeCycleController( context_sensitive=False )
         admin_group = idma_conf.administration['admin_group']
 
-        print( "Admin group is '{0}'.  Preparing to inject.".format( admin_group ) )
-
+        print( "Target IDMA administrator group is '{0}'.".format( admin_group ) )
         group_creation_result = gc.create_group( admin_group )
+
         if group_creation_result.status == STATUS.SUCCESS:
-            group = json.loads( group_creation_result.attachment )[0]
-            print("Group named '{0}' injected.".format( group['name'] ))
+            group = deserialize( group_schema, group_creation_result.attachment )[0]
+            print( "Group named '{0}' injected.".format( group.name ) )
         elif group_creation_result.status == STATUS.DATA_CONFLICT:
-            group = json.loads( group_creation_result.attachment )[0]
-            print("Group named '{0}' already exists.  Moving forward.".format( group['name'] ) )
+            print( "Group named '{0}' already exists.  Fetching group object.".format( admin_group ) )
+            group_fetch_result = gc.get_group_by_name( admin_group )
+            if group_fetch_result.status == STATUS.SUCCESS:
+                group = deserialize( group_schema, group_fetch_result.attachment )[0]
+                print( "Group found with ID '{0}'.".format( group.id ) )
+            else:
+                # group already exists and could not be fetched
+                print( group_fetch_result.message )
+                exit(1)
         else:
+            # Unhandled results of group creation failure
             print( group_creation_result.message )
             exit(1)
 
@@ -54,20 +66,19 @@ def Main():
 
         # create user or determine it already exists, or bail
         if user_creation_result.status == STATUS.SUCCESS:
-            # add user to group
-            user = json.loads(user_creation_result.attachment)[0]
-            print( "Created user '{0}' with email '{1}'.".format( user['username'], user['id'] ) )
+            user = deserialize(user_schema, user_creation_result.attachment)[0]
+            print( "Created user '{0}' with email '{1}'.".format( user.username, user.id ) )
         elif user_creation_result.status == STATUS.DATA_CONFLICT:
-            user = json.loads(user_creation_result.attachment)[0]
             print( user_creation_result.message )
+            exit(1)
         else:
             print( user_creation_result.message )
             exit(1)
 
-        add_user_to_admin_group_result = gc.add_user_to_group( user['id'], group['id'] )
+        add_user_to_admin_group_result = gc.add_user_to_group( user.id, group.id )
 
         if add_user_to_admin_group_result.status == STATUS.SUCCESS:
-            print("User '{0}' has been injected into the group '{1}'.".format( user['email'], group['name'] ))
+            print("User with current email address of '{0}' and an ID of '{2}' has been injected into the group '{1}'.".format( user.email, group.name, user.id ))
         else:
             print( add_user_to_admin_group_result.message )
             exit(1)
@@ -75,3 +86,5 @@ def Main():
 
 if __name__=='__main__':
     Main()
+else:
+    print("Consult the documentation.")
