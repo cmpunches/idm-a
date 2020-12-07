@@ -7,8 +7,8 @@ from Core.SessionLifecycle.IO_Schemas import *
 
 
 class SessionLifeCycleController:
-    def __init__(self):
-        pass
+    def __init__(self, context_sensitive=True):
+        self.session_aware = context_sensitive
 
     # authentication point
     def create_session( self, handle, password ):
@@ -52,7 +52,8 @@ class SessionLifeCycleController:
     def destroy_all_sessions_for_user(self, uid ):
         pass
 
-    def session_is_active( self, token ):
+    @staticmethod
+    def session_is_active( token ):
         session = SessionModel.query.get( token )
 
         if session is not None:
@@ -72,9 +73,10 @@ class SessionLifeCycleController:
             # session does not exist
             return False
 
-    def get_session_object(self, token):
+    @staticmethod
+    def get_session_object( token):
         context = None
-        if self.session_is_active( token ):
+        if SessionLifeCycleController.session_is_active( token ):
             context = SessionModel.query.get( token )
             return context
         else:

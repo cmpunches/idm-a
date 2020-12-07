@@ -13,7 +13,6 @@ class IDMA_Conf:
         self.user_security = dict()
         self.administration = dict()
 
-        self.database['driver'] = ini_parser.get('database', 'driver')
         self.database['user']   = ini_parser.get('database', 'user')
         self.database['pass']   = ini_parser.get('database', 'pass')
         self.database['host']   = ini_parser.get('database', 'host')

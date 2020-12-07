@@ -11,7 +11,7 @@ authorizations = {
 def create_api( app ):
     api = Api(
         title='IDM/A Backend Interface',
-        version='1.0',
+        version='Prototype',
         description='Backend API for the IDM/A system.',
         authorizations=authorizations
     )
