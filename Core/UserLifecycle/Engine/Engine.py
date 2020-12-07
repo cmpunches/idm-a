@@ -6,8 +6,6 @@ from sqlalchemy import exc
 
 import smtplib, ssl, re
 
-# USER ENGINE
-
 
 class UserLifeCycleController:
     def __init__(self, context_sensitive=True):

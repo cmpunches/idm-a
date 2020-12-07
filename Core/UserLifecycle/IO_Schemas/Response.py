@@ -1,5 +1,4 @@
 from Core.UserLifecycle.StorageModels.Models import *
-
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
 
 
@@ -19,5 +18,3 @@ class UserSchema(SQLAlchemySchema):
 
 
 user_schema = UserSchema( many=True )
-
-

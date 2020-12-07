@@ -2,6 +2,7 @@ from Core.GroupLifecycle.Engine import *
 
 from flask_restplus import Namespace, Resource
 from flask import request
+from functools import wraps
 
 group_namespace = Namespace('group', description="Group Management Functions")
 
@@ -10,16 +11,22 @@ group_controller = GroupLifeCycleController()
 
 @group_namespace.route( 's', methods=['GET', 'DELETE', 'POST'] )
 class GroupPortfolioRoute(Resource):
+    @group_namespace.doc( security="SESSION_ID")
     @group_namespace.response( 200, "Groups found." )
     @group_namespace.response( 500, "General failure." )
+    @group_namespace.response( 401, "Not authorized." )
     @group_namespace.doc( description="List all groups.")
     def get(self):
-        response = group_controller.get_all_groups()
+        context = request.headers.get('SESSION_ID')
+        print("Interface: Context is: {0}".format( context ))
+        response = group_controller.get_all_groups(context=context)
 
         if response.status == STATUS.SUCCESS:
             return response.to_json(), 200
         if response.status == STATUS.FAILURE:
             return response.to_json(), 500
+        if response.status == STATUS.NOT_AUTHORIZED:
+            return response.to_json(), 401
 
         response.message = "General Failure.  This is a bug and should be reported."
         return response.to_json(), 500

@@ -1,7 +1,7 @@
-from ..StorageModels import *
-from Core.UserLifecycle.IO_Schemas.Response import *
-from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field, SQLAlchemyAutoSchema
+from marshmallow_sqlalchemy import auto_field, SQLAlchemyAutoSchema
 from marshmallow_sqlalchemy.fields import Nested
+from Core.UserLifecycle.IO_Schemas import *
+from Core.SessionLifecycle.StorageModels import *
 
 
 class Session(SQLAlchemyAutoSchema):
@@ -14,6 +14,6 @@ class Session(SQLAlchemyAutoSchema):
     timestamp        = auto_field()
 
     uid              = auto_field()
-    assoc_user       = Nested( UserSchema, many=True, exclude=["sessions"])
+
 
 session_schema = Session( many=True )

@@ -1,6 +1,9 @@
 from Core.Shared.Config import *
 import datetime
 from sqlalchemy import or_
+from Core.UserLifecycle.StorageModels import *
+from Core import *
+from Core.SessionLifecycle.IO_Schemas import *
 
 
 class SessionLifeCycleController:
@@ -54,7 +57,7 @@ class SessionLifeCycleController:
 
         if session is not None:
             timestamp = session.timestamp
-            delta = datetime.now() - datetime.fromisoformat( timestamp )
+            delta = datetime.now() - datetime.fromisoformat( str( timestamp) )
             if delta.seconds > SESSION_EXPIRY_SECONDS:
                 print( "Expiring session with token {0}".format( session.token ) )
                 # it's there but it's expired, so it's not active
@@ -69,10 +72,10 @@ class SessionLifeCycleController:
             # session does not exist
             return False
 
-    def return_session_context( self, token ):
+    def get_session_object(self, token):
         context = None
         if self.session_is_active( token ):
-            context = SessionModel.get( token )
+            context = SessionModel.query.get( token )
             return context
         else:
             return None
