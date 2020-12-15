@@ -5,6 +5,7 @@ from Core.Shared.ResponseSchema import *
 from sqlalchemy import exc
 
 import smtplib, ssl, re
+from Core.Shared.Decorators import *
 
 
 class UserLifeCycleController:
@@ -30,21 +31,25 @@ class UserLifeCycleController:
             return False
         return True
 
-    def get_all_users( self, token ):
+    @require_access_level(group=idma_conf.administration['admin_group'])
+    def get_all_users( self, context=None ):
         users = UserModel.query.all()
         return EResp( STATUS.SUCCESS, "Dumping ALL users.", user_schema.dumps( users ) )
 
-    def get_user_by_uid( self, user_id ):
+    @require_active_session
+    def get_user_by_uid( self, user_id, context=None ):
         user = UserModel.query.filter_by( id=user_id ).first()
         return EResp( STATUS.SUCCESS, "Found the user.", user_schema.dumps( [ user ] ) )
 
-    def get_user_by_username( self, username ):
+    @require_active_session
+    def get_user_by_username( self, username, context=None ):
         user = UserModel.query.filter_by( username=username ).first()
         if user is not None:
             return EResp( STATUS.SUCCESS, "Found the user.", user_schema.dumps( [ user ] ) )
         else:
             return EResp( STATUS.DATA_CONFLICT, "User '{0}' does not exist.".format( username ), None )
 
+    @require_active_session
     def get_user_by_email( self, email ):
         user = UserModel.query.filter_by( email=email ).first()
         if user is not None:
@@ -52,7 +57,7 @@ class UserLifeCycleController:
         else:
             return EResp( STATUS.DATA_CONFLICT, "User '{0}' does not exist.".format( username ), None )
 
-    def create_user( self, username, email, password, first_name, last_name, context=None ):
+    def create_user( self, username, email, password, first_name, last_name ):
         # add context checks
 
         user = UserModel(
@@ -81,23 +86,22 @@ class UserLifeCycleController:
 
         return EResp( STATUS.SUCCESS, "User successfully created.", user_schema.dumps( [ user ] ) )
 
-    def update_user_details( self, user_id, email, username, first_name, last_name ):
-
+    @require_same_user
+    def update_user_details( self, user_id, email, username, first_name, last_name, context=None ):
         user = UserModel.query.get( user_id )
-
         if user is not None:
 
             user.username=username
             user.first_name=first_name
             user.last_name=last_name
 
+            if user.email != email:
+                user.email = email
+                user.verified = False
+
             try:
                 db.session.commit()
-
-                if user.email != email:
-                    user.email = email
-                    db.session.commit()
-                    self.require_email_validation( email )
+                self.require_email_validation( email )
             except:
                 return EResp(
                     STATUS.FAILURE,
@@ -113,8 +117,8 @@ class UserLifeCycleController:
             user_schema.dumps( [ user ] )
         )
 
-    def update_user_password( self, user_id, password ):
-
+    @require_same_user
+    def update_user_password( self, user_id, password, context=None ):
         user = UserModel.query.get( user_id )
 
         if user is not None:
@@ -135,9 +139,12 @@ class UserLifeCycleController:
             STATUS.SUCCESS,
             "Password updated for user '{0}'.".format( user.username ),
             user_schema.dumps( [ user ] )
+
+
         )
 
-    def deactivate_user( self, user_id ):
+    @require_same_user
+    def deactivate_user( self, user_id, context=None ):
         user = UserModel.query.get( user_id )
         if user.active:
             user.active = False
@@ -163,6 +170,7 @@ class UserLifeCycleController:
         user_validation = EmailValidationModel( email=email )
 
         db.session.add( user_validation )
+
         try:
             db.session.commit()
         except exc.IntegrityError as err:
@@ -176,7 +184,7 @@ class UserLifeCycleController:
 
         return EResp( STATUS.SUCCESS, "Email validation is now required for that email address.", user_validation )
 
-    def validate_email_code(self, code):
+    def validate_email_code( self, code ):
         # get a validation entry for that code
         validation_entry = EmailValidationModel.query.filter_by( code=code ).first()
 
@@ -238,7 +246,6 @@ The {0} Team.
 
 
         # create a secure SSL context
-        # whatever that means
         context = ssl.create_default_context()
 
         with smtplib.SMTP_SSL( SMTP_SERVER, SMTP_PORT, context=context ) as server:
